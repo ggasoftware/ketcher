@@ -1,10 +1,11 @@
 #include <stdio.h>
+#include <iostream>
 #include <vector>
-#include "base_cpp\array.h"
+#include "base_cpp/array.h"
 #include "ketcher_server.h"
 
-#include <boost\thread\thread.hpp>
-#include <boost\assign\list_of.hpp>
+#include <boost/thread/thread.hpp>
+#include <boost/assign/list_of.hpp>
 
 using namespace indigo;
 
@@ -49,7 +50,9 @@ bool testKsOutput( int thread_count, const char *command_name, int fields_count,
 {
    boost::thread_group ks_threads;
    std::vector<KsOutput> ks_outputs(thread_count);
-   
+  
+   std::cout << command_name << std::endl; 
+
    for (int i = 0; i < thread_count; i++)
       ks_threads.create_thread(boost::bind(&runCmd, command_name, fields_count, fields, values, boost::ref(ks_outputs[i])));
 

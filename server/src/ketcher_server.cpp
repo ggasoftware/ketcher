@@ -178,10 +178,12 @@ static void open( KSFieldMap &fields )
    ks_out.append("<html><body onload=\"parent.ui.loadMoleculeFromFile()\" title=\"");
    
    string b64str;
-   convertToBase64(string("Ok.\n"), b64str);
+   string instr = string("Ok.\n");
+   convertToBase64(instr, b64str);
    ks_out.append(b64str);
 
-   convertToBase64(string(fields["filedata"]), b64str);
+   instr = string(fields["filedata"]);
+   convertToBase64(instr, b64str);
    ks_out.append(b64str);
 
    ks_out.append("\"></body></html>");
@@ -319,7 +321,9 @@ static void render( KSFieldMap &fields )
 
    indigoSetOption("render-output-format", format.c_str());
    indigoSetOption("render-background-color", "255, 255, 255");
-   indigoSetOption("render-bond-length", _itoa(def_bond_length, num_buf, 10));
+   std::stringstream bondlenss;
+   bondlenss << def_bond_length;
+   indigoSetOption("render-bond-length", bondlenss.str().c_str());
 
    KSFieldMap::iterator size_it = fields.find("size");
    KSFieldMap::iterator perc_it = fields.find("coef");
@@ -337,7 +341,9 @@ static void render( KSFieldMap &fields )
          throw Exception("render: incorrect percentage field\n");
 
       float coef = perc / 100.0f;
-      indigoSetOption("render-bond-length", _itoa((int)(def_bond_length * coef), num_buf, 10));
+      std::stringstream bondlensscoeff;
+      bondlensscoeff << def_bond_length * coef;
+      indigoSetOption("render-bond-length", bondlensscoeff.str().c_str());
    }
 
    int indigo_buffer = indigoWriteBuffer();
