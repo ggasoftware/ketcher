@@ -104,6 +104,10 @@ message(STATUS ${INDIGO_INCLUDE_DIR})
 add_library(ketcher-server-shared SHARED ${KetcherServer_src} ${KetcherServer_headers})
 target_link_libraries(ketcher-server-shared ${Indigo_LIBRARIES} ${Boost_LIBRARIES})
 
+if(APPLE)
+    SET_TARGET_PROPERTIES(ketcher-server-shared PROPERTIES LINK_FLAGS "-Xlinker -framework -Xlinker ApplicationServices")
+endif()
+
 PACK_SHARED(ketcher-server-shared)
 
 add_executable(ketcher-server-test test/ks_test.cpp)
