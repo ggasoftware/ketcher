@@ -1,0 +1,3 @@
+[submodule "third-party"]
+	path = third-party
+	url = K:/Projects/OpenSource/indigo-dev/third_party
