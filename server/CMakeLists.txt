@@ -94,11 +94,11 @@ set(Indigo_LIBRARIES ${Indigo_LIBRARIES} ${Indigo_LIBRARIES} ${Indigo_LIBRARIES}
 
 
 include_directories(${BOOST_INCLUDE_DIR})
-include_directories(../third-party/indigo/common)
-include_directories(../third-party/indigo/api)
-include_directories(../third-party/indigo/api/plugins/renderer)
-include_directories(../third-party/indigo/api/plugins/inchi)
-include_directories(../third-party/boost/include)
+include_directories(../third_party/indigo/common)
+include_directories(../third_party/indigo/api)
+include_directories(../third_party/indigo/api/plugins/renderer)
+include_directories(../third_party/indigo/api/plugins/inchi)
+include_directories(../third_party/boost/include)
 message(STATUS ${INDIGO_INCLUDE_DIR})
 
 add_library(ketcher-server-shared SHARED ${KetcherServer_src} ${KetcherServer_headers})
