@@ -32,8 +32,8 @@ file(GLOB KetcherServer_src src/*.cpp)
 file(GLOB KetcherServer_headers src/*.h)
 
 include_directories(src)
-add_subdirectory(../third-party/indigo/build_scripts/indigo-all "${CMAKE_CURRENT_BINARY_DIR}/indigo-all")
-add_subdirectory(../third-party/boost "${CMAKE_CURRENT_BINARY_DIR}/boost")
+add_subdirectory(../third_party/indigo/build_scripts/indigo-all "${CMAKE_CURRENT_BINARY_DIR}/indigo-all")
+add_subdirectory(../third_party/boost "${CMAKE_CURRENT_BINARY_DIR}/boost")
 # Download Boost
 # set(BOOST_INCLUDE_DIR "${THIRD_PARTY_DIR}/boost")
 # set(BOOST_LIBRARY_DIR "${THIRD_PARTY_DIR}/boost/${SYSTEM_NAME}/${SUBSYSTEM_NAME}")
