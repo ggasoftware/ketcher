@@ -15,10 +15,11 @@
 package com.ggasoftware.ketcher;
 
 import com.sun.jna.Library;
+import com.sun.jna.ptr.IntByReference;
 
 public interface KetcherServerLib extends Library
 {
-    String ketcherServerRunCommand(String commandName, int fieldsCount, String[] fields, String[] values, int[] outputLen, String[] contentParams);
+    String ketcherServerRunCommand(String commandName, int fieldsCount, String[] fields, String[] values, IntByReference outputLen, String[] contentParams);
     int ketcherServerGetCommandCount();
     String ketcherServerGetCommandName(int id);
 }
