@@ -11,8 +11,8 @@ using namespace indigo;
 
 struct KsOutput
 {
-   std::vector<char> data; 
-   std::string content_params; 
+   std::vector<char> data;
+   std::string content_params;
 
    bool compare( KsOutput &another )
    {
@@ -45,13 +45,13 @@ void runCmd( const char *command_name, int fields_count, const char ** fields, c
    return;
 }
 
-bool testKsOutput( int thread_count, const char *command_name, int fields_count, 
+bool testKsOutput( int thread_count, const char *command_name, int fields_count,
                    const char ** fields, const char ** values )
 {
    boost::thread_group ks_threads;
    std::vector<KsOutput> ks_outputs(thread_count);
-  
-   std::cout << command_name << std::endl; 
+
+   std::cout << command_name << " " << fields_count << " " << fields << " " << values << std::endl;
 
    for (int i = 0; i < thread_count; i++)
       ks_threads.create_thread(boost::bind(&runCmd, command_name, fields_count, fields, values, boost::ref(ks_outputs[i])));
@@ -92,13 +92,13 @@ struct KsInput
    str fields[10];
    str values[10];
 
-   KsInput(const char *cmd_name) : 
+   KsInput(const char *cmd_name) :
            command_name(cmd_name)
    {
       fields_count = 0;
    }
 
-   KsInput(const char *cmd_name, const char * f1, const char * v1) : 
+   KsInput(const char *cmd_name, const char * f1, const char * v1) :
            command_name(cmd_name)
    {
       fields_count = 1;
@@ -106,8 +106,8 @@ struct KsInput
       values[0] = v1;
    }
 
-   KsInput(const char *cmd_name, const char * f1, const char * v1, 
-                                 const char * f2, const char * v2) : 
+   KsInput(const char *cmd_name, const char * f1, const char * v1,
+                                 const char * f2, const char * v2) :
            command_name(cmd_name)
    {
       fields_count = 2;
@@ -115,12 +115,12 @@ struct KsInput
       fields[1] = f2;
       values[0] = v1;
       values[1] = v2;
-      
+
    }
 
-   KsInput(const char *cmd_name, const char * f1, const char * v1, 
+   KsInput(const char *cmd_name, const char * f1, const char * v1,
                                  const char * f2, const char * v2,
-                                 const char * f3, const char * v3) : 
+                                 const char * f3, const char * v3) :
            command_name(cmd_name)
    {
       fields_count = 3;
@@ -130,7 +130,7 @@ struct KsInput
       values[0] = v1;
       values[1] = v2;
       values[2] = v3;
-      
+
    }
 
    ~KsInput()
@@ -172,7 +172,7 @@ int main(int argc, char* argv[])
                     "M  END                                                                \n";
 
    const char *null_arg = 0;
-   
+
    const char *render_fields[2] = {"smiles", "format"};
    const char *render_values[2] = {"N1=C(O)C2NC=NC=2N(CCC)C1=O", "png"};
    std::vector<KsInput> input_args = boost::assign::list_of<KsInput>
@@ -185,7 +185,7 @@ int main(int argc, char* argv[])
       ("save", "filedata", filedata)
       ("getinchi", "smiles", "N1=C(O)c2[n]c[n]c2N(CCC)C1=O")
       ("automap", "smiles", "CCC>>CCN", "mode", "discard");
-  
+
    int thr_count = 20;
    std::vector<KsInput>::iterator arg_it;
    for (arg_it = input_args.begin(); arg_it != input_args.end(); arg_it++)
@@ -193,7 +193,7 @@ int main(int argc, char* argv[])
          return 1;
 
    std::cout << "success\n";
-   
+
 
    return 0;
 }

@@ -2,9 +2,9 @@ import os
 import shutil
 import subprocess
 
-#if os.path.exists('build'):
-#    shutil.rmtree('build')
-#os.mkdir('build')
+if os.path.exists('build'):
+    shutil.rmtree('build')
+os.mkdir('build')
 os.chdir('build')
 
 # TODO: Multiarch
