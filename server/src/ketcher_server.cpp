@@ -66,7 +66,11 @@ static int loadObject( KSFieldMap &fields, bool &is_rxn, bool &is_query )
    else
       throw Exception("Loading object: incorrect input field");
 
-   if (strstr(mol_str, ">>") || (strstr(mol_str, "$RXN") == mol_str))
+   if (strncmp(mol_str, "InChI=", 6) == 0)
+   {
+      obj = indigoInchiLoadMolecule(mol_str);
+   }
+   else if (strstr(mol_str, ">>") || (strstr(mol_str, "$RXN") == mol_str))
    {
       is_rxn = 1;
       obj = indigoLoadReactionFromString(mol_str);
@@ -149,7 +153,7 @@ void convertToBase64( std::string &in, std::string &out )
     std::stringstream os;
     typedef boost::archive::iterators::base64_from_binary<    // convert binary values ot base64 characters
                boost::archive::iterators::transform_width<    // retrieve 6 bit integers from a sequence of 8 bit bytes
-                  const char *, 6, 8 
+                  const char *, 6, 8
                >
             > base64_text; // compose all the above operations in to a new iterator
 
@@ -161,7 +165,7 @@ void convertToBase64( std::string &in, std::string &out )
 
     out.clear();
     out.assign(os.str());
-    
+
     for (int i = 0; i < out.length() % 4; i++)
        out.append("=");
 }
@@ -176,7 +180,7 @@ static void open( KSFieldMap &fields )
 
    string &ks_out = ks_output.get();
    ks_out.append("<html><body onload=\"parent.ui.loadMoleculeFromFile()\" title=\"");
-   
+
    string b64str;
    string instr = string("Ok.\n");
    convertToBase64(instr, b64str);
@@ -228,7 +232,7 @@ static void save( KSFieldMap &fields )
 
    s_stream << "Content-Disposition" << "\n" << "attachment; filename=\"ketcher." << type << "\"\n";
    ks_content_params.get().append(s_stream.str());
-   
+
    string &ks_out = ks_output.get();
    ks_out.append(data);
 }
@@ -276,7 +280,7 @@ static void getInchi( KSFieldMap &fields )
 
    if (res == 0)
       throw Exception(indigoGetLastError());
-   
+
    indigoFree(obj);
    ks_output.get().append("Ok.\n");
    ks_output.get().append(res);
@@ -292,7 +296,7 @@ static void getSmiles( KSFieldMap &fields )
 
    if (res == 0)
       throw Exception(indigoGetLastError());
-   
+
    indigoFree(obj);
    ks_output.get().append(res);
 }
@@ -327,7 +331,7 @@ static void render( KSFieldMap &fields )
 
    KSFieldMap::iterator size_it = fields.find("size");
    KSFieldMap::iterator perc_it = fields.find("coef");
-   
+
    if ((size_it != fields.end()) && (perc_it != fields.end()))
       throw Exception("render: only one of 'size' and 'coef' fields is allowed\n");
 
@@ -371,7 +375,7 @@ struct KetcherServerCommand
    const char *name;
    void (*cmd_proc)(KSFieldMap &fields);
 
-   KetcherServerCommand( const char *new_name, void (*new_cmd_proc)(KSFieldMap &fields) ) : 
+   KetcherServerCommand( const char *new_name, void (*new_cmd_proc)(KSFieldMap &fields) ) :
                          name(new_name), cmd_proc(new_cmd_proc)
    {
    }
@@ -424,7 +428,7 @@ static const char * runCommand( int cmd_idx, KSFieldMap &fields, int *output_len
 }
 
 CEXPORT const char * ketcherServerRunCommand( const char *command_name, int fields_count,
-                                              const char **fields, const char **values, 
+                                              const char **fields, const char **values,
                                               int *output_len,
                                               const char **content_params )
 {

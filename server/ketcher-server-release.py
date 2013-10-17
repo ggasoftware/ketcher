@@ -7,11 +7,11 @@ if os.path.exists('build'):
 os.mkdir('build')
 os.chdir('build')
 
-# TODO: Multiarch
 subprocess.check_call('cmake ..', shell=True)
 subprocess.check_call('cmake --build .', shell=True)
 subprocess.check_call('cmake --build . --target install', shell=True)
 
+'''
 os.chdir('..')
 if os.path.exists('libs'):
     shutil.rmtree('libs')
@@ -46,3 +46,4 @@ shutil.copy('../raphael.js', 'java/src/main/webapp/')
 
 os.chdir('java')
 subprocess.check_call('mvn package', shell=True)
+'''
