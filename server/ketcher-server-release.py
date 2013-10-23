@@ -8,8 +8,8 @@ os.mkdir('build')
 os.chdir('build')
 
 subprocess.check_call('cmake ..', shell=True)
-subprocess.check_call('cmake --build .', shell=True)
-subprocess.check_call('cmake --build . --target install', shell=True)
+subprocess.check_call('cmake --build . --config Release', shell=True)
+subprocess.check_call('cmake --build . --target install --config Release', shell=True)
 
 '''
 os.chdir('..')
