@@ -38,10 +38,10 @@ endif()
 
 PACK_SHARED(ketcher-server-shared)
 
-add_executable(ketcher-server-test test/ks_test.cpp)
-target_link_libraries(ketcher-server-test ketcher-server-shared)
+#add_executable(ketcher-server-test test/ks_test.cpp)
+#target_link_libraries(ketcher-server-test ketcher-server-shared)
 
-add_test(NAME ketcher-server-test COMMAND ketcher-server-test)
+#add_test(NAME ketcher-server-test COMMAND ketcher-server-test)
 
 SET(CMAKE_INSTALL_PREFIX "install")
 SET(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
