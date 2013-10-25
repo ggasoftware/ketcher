@@ -1,49 +1,50 @@
 import os
 import shutil
+import sys
 import subprocess
+
+from optparse import OptionParser
 
 if os.path.exists('build'):
     shutil.rmtree('build')
 os.mkdir('build')
 os.chdir('build')
 
-subprocess.check_call('cmake ..', shell=True)
+presets = {
+    "win32" : ("Visual Studio 10", ""),
+    "win64" : ("Visual Studio 10 Win64", ""),
+    "win32-2012" : ("Visual Studio 11", ""),
+    "win64-2012" : ("Visual Studio 11 Win64", ""),
+    "win32-2013" : ("Visual Studio 12", ""),
+    "win64-2013" : ("Visual Studio 12 Win64", ""),
+    "win32-mingw": ("MinGW Makefiles", ""),
+    "linux32" : ("Unix Makefiles", "-DSUBSYSTEM_NAME=x86"),
+    "linux64" : ("Unix Makefiles", "-DSUBSYSTEM_NAME=x64"),
+    "mac10.5" : ("Xcode", "-DSUBSYSTEM_NAME=10.5"),
+    "mac10.6" : ("Xcode", "-DSUBSYSTEM_NAME=10.6"),
+    "mac10.7" : ("Xcode", "-DSUBSYSTEM_NAME=10.7"),
+    "mac10.8" : ("Xcode", "-DSUBSYSTEM_NAME=10.8"),
+    "mac10.9" : ("Xcode", "-DSUBSYSTEM_NAME=10.9"),
+}
+
+parser = OptionParser(description='Indigo libraries build script')
+parser.add_option('--generator', help='this option is passed as -G option for cmake')
+parser.add_option('--preset', type="choice", dest="preset",
+    choices=list(presets.keys()), help='build preset %s' % (str(presets.keys())))
+
+(args, left_args) = parser.parse_args()
+if len(left_args) > 0:
+    print("Unexpected arguments: %s" % (str(left_args)))
+    exit()
+
+if args.preset:
+    args.generator, args.params = presets[args.preset]
+if not args.generator:
+    print("Generator must be specified")
+    exit()                                        
+
+command = 'cmake -G "{0}" ..'.format(args.generator)
+
+subprocess.check_call(command, shell=True)
 subprocess.check_call('cmake --build . --config Release', shell=True)
 subprocess.check_call('cmake --build . --target install --config Release', shell=True)
-
-'''
-os.chdir('..')
-if os.path.exists('libs'):
-    shutil.rmtree('libs')
-os.makedirs('libs')
-shutil.copytree('build/install/shared', 'libs/shared')
-
-shutil.rmtree('java/src/main/webapp/chem', ignore_errors=True)
-shutil.rmtree('java/src/main/webapp/icons', ignore_errors=True)
-shutil.rmtree('java/src/main/webapp/mol', ignore_errors=True)
-shutil.rmtree('java/src/main/webapp/privat', ignore_errors=True)
-shutil.rmtree('java/src/main/webapp/reaxys', ignore_errors=True)
-shutil.rmtree('java/src/main/webapp/rnd', ignore_errors=True)
-shutil.rmtree('java/src/main/webapp/ui', ignore_errors=True)
-shutil.rmtree('java/src/main/webapp/util', ignore_errors=True)
-shutil.copytree('../chem', 'java/src/main/webapp/chem')
-shutil.copytree('../icons', 'java/src/main/webapp/icons')
-shutil.copytree('../mol', 'java/src/main/webapp/mol')
-shutil.copytree('../privat', 'java/src/main/webapp/privat')
-shutil.copytree('../reaxys', 'java/src/main/webapp/reaxys')
-shutil.copytree('../rnd', 'java/src/main/webapp/rnd')
-shutil.copytree('../ui', 'java/src/main/webapp/ui')
-shutil.copytree('../util', 'java/src/main/webapp/util')
-shutil.copy('../base64.js', 'java/src/main/webapp/')
-shutil.copy('../demo.html', 'java/src/main/webapp/')
-shutil.copy('../favicon.ico', 'java/src/main/webapp/')
-shutil.copy('../ketcher.css', 'java/src/main/webapp/')
-shutil.copy('../ketcher.html', 'java/src/main/webapp/')
-shutil.copy('../ketcher.js', 'java/src/main/webapp/')
-shutil.copy('../loading.gif', 'java/src/main/webapp/')
-shutil.copy('../prototype-min.js', 'java/src/main/webapp/')
-shutil.copy('../raphael.js', 'java/src/main/webapp/')
-
-os.chdir('java')
-subprocess.check_call('mvn package', shell=True)
-'''
