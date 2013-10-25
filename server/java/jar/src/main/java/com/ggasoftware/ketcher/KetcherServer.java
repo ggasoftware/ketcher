@@ -162,10 +162,10 @@ public class KetcherServer {
             _lib = (KetcherServerLib) Native.loadLibrary(getPathToBinary(path, "libketcher-server.dylib"), KetcherServerLib.class);
         else // _os == OS_WINDOWS
         {
-            if ((new File(getPathToBinary(path, "msvcr100.dll"))).exists())
-                System.load(getPathToBinary(path, "msvcr100.dll"));
-            if ((new File(getPathToBinary(path, "msvcp100.dll"))).exists())
-                System.load(getPathToBinary(path, "msvcp100.dll"));
+            if ((new File(getPathToBinary(path, "msvcr110.dll"))).exists())
+                System.load(getPathToBinary(path, "msvcr110.dll"));
+            if ((new File(getPathToBinary(path, "msvcp110.dll"))).exists())
+                System.load(getPathToBinary(path, "msvcp110.dll"));
             _lib = (KetcherServerLib) Native.loadLibrary(getPathToBinary(path, "ketcher-server.dll"), KetcherServerLib.class);
         }
     }
