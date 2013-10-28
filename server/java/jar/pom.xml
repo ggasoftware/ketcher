@@ -13,7 +13,7 @@
 
     <name>Ketcher</name>
     <description>Web-based chemical structure editor</description>
-    <url>http://ggasoftware.com/opensource/indigo/api</url>
+    <url>http://ggasoftware.com/opensource/ketcher</url>
 
     <licenses>
         <license>
@@ -75,6 +75,16 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.3.1</version>
+                <configuration>
+                    <archive>
+                        <addMavenDescriptor>false</addMavenDescriptor>
+                    </archive>
+                </configuration>
             </plugin>
         </plugins>
         <resources>
