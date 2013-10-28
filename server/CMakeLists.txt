@@ -9,7 +9,7 @@ ENABLE_TESTING()
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/../../common/cmake/ ${CMAKE_CURRENT_SOURCE_DIR}/cmake/)
 
 set(THIRD_PARTY_DIR ${CMAKE_SOURCE_DIR}/third_party)
-file(GLOB KetcherServer_src src/*.cpp)
+file(GLOB KetcherServer_src src/*.c*)
 file(GLOB KetcherServer_headers src/*.h)
 
 include_directories(src)
@@ -29,6 +29,11 @@ include_directories(../third_party/indigo/api/plugins/inchi)
 message(STATUS ${INDIGO_INCLUDE_DIR})
 
 add_library(ketcher-server-shared SHARED ${KetcherServer_src} ${KetcherServer_headers})
+if (UNIX AND NOT APPLE)
+	if(${SUBSYSTEM_NAME} MATCHES "x64")
+		set_target_properties(ketcher-server-shared PROPERTIES LINK_FLAGS "${LINK_FLAGS} -Wl,--wrap=memcpy")
+	endif()
+endif()
 target_link_libraries(ketcher-server-shared ${Indigo_LIBRARIES} ${Boost_LIBRARIES})
 SET_TARGET_PROPERTIES(ketcher-server-shared PROPERTIES OUTPUT_NAME "ketcher-server")
 
