@@ -10,13 +10,10 @@
 #include <map>
 #include <string>
 #include <climits>
-#include <boost/thread/tss.hpp>
-#include <boost/assign/list_of.hpp>
-#include <boost/archive/iterators/base64_from_binary.hpp>
-#include <boost/archive/iterators/transform_width.hpp>
-#include <boost/archive/iterators/ostream_iterator.hpp>
 #include <sstream>
 #include <iostream>
+#include <stdint.h>
+#include <stdlib.h>
 
 using namespace indigo;
 using namespace std;
@@ -24,32 +21,56 @@ using namespace std;
 typedef pair<string , string> KSField;
 typedef map<string , string> KSFieldMap;
 
-struct ThreadLocalString
-{
-private:
-   boost::thread_specific_ptr<string> _tsp_str;
-public:
-   string & get( void )
-   {
-      if (_tsp_str.get() == 0)
-         _tsp_str.reset(new string());
-      return *(_tsp_str.get());
-   }
-
-   ~ThreadLocalString( void )
-   {
-      if (_tsp_str.get() != 0)
-      {
-         string *str = _tsp_str.get();
-         delete str;
-      }
-      _tsp_str.release();
-   }
-};
+#ifdef _WIN32
+   #define KETCHER_SERVER_TL __declspec(thread)
+#elif (defined __GNUC__ || defined __APPLE__)
+   #define KETCHER_SERVER_TL __thread
+#endif
 
 static const int def_bond_length = 100;
-static ThreadLocalString ks_output;
-static ThreadLocalString ks_content_params;
+static KETCHER_SERVER_TL char ks_output[10000] = {0};
+static KETCHER_SERVER_TL size_t ks_output_length = 0;
+static KETCHER_SERVER_TL char ks_content_params[10000] = {0};
+
+static const char encoding_table[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+                                      'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+                                      'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+                                      'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
+                                      'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
+                                      'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+                                      'w', 'x', 'y', 'z', '0', '1', '2', '3',
+                                      '4', '5', '6', '7', '8', '9', '+', '/'};
+
+void convertToBase64(std::string &data, std::string &encoded_data)
+{
+   size_t input_length = data.size();
+   size_t output_length;
+   int mod_table[] = {0, 2, 1};
+
+   output_length = 4 * ((input_length + 2) / 3);
+
+   encoded_data.clear();
+   encoded_data.resize(output_length);
+   
+   int i = 0;
+   int j = 0;
+   while (i < input_length)
+   {
+      uint32_t octet_a = i < input_length ? data[i++] : 0;
+      uint32_t octet_b = i < input_length ? data[i++] : 0;
+      uint32_t octet_c = i < input_length ? data[i++] : 0;
+
+      uint32_t triple = (octet_a << 0x10) + (octet_b << 0x08) + octet_c;
+
+      encoded_data[j++] = encoding_table[(triple >> 3 * 6) & 0x3F];
+      encoded_data[j++] = encoding_table[(triple >> 2 * 6) & 0x3F];
+      encoded_data[j++] = encoding_table[(triple >> 1 * 6) & 0x3F];
+      encoded_data[j++] = encoding_table[(triple >> 0 * 6) & 0x3F];
+   }
+
+   for (int i = 0; i < mod_table[input_length % 3]; i++)
+      encoded_data[output_length - 1 - i] = '=';
+}
 
 static int loadObject( KSFieldMap &fields, bool &is_rxn, bool &is_query )
 {
@@ -112,7 +133,8 @@ static const char * objMolfile ( int obj, bool is_rxn )
 
 static void knocknock( KSFieldMap &fields )
 {
-   ks_output.get().append("You are welcome!");
+   strcat(ks_output, "You are welcome!");
+   ks_output_length = strlen(ks_output);
 }
 
 static void layout( KSFieldMap &fields )
@@ -124,8 +146,9 @@ static void layout( KSFieldMap &fields )
    const char *res = objMolfile(obj, is_rxn);
 
    indigoFree(obj);
-   ks_output.get().append("Ok.\n");
-   ks_output.get().append(res);
+   strcat(ks_output, "Ok.\n");
+   strcat(ks_output, res);
+   ks_output_length = strlen(ks_output);
 }
 
 static void automap( KSFieldMap &fields )
@@ -144,53 +167,32 @@ static void automap( KSFieldMap &fields )
    const char *res = objMolfile(rxn, is_rxn);
 
    indigoFree(rxn);
-   ks_output.get().append("Ok.\n");
-   ks_output.get().append(res);
-}
-
-void convertToBase64( std::string &in, std::string &out )
-{
-    std::stringstream os;
-    typedef boost::archive::iterators::base64_from_binary<    // convert binary values ot base64 characters
-               boost::archive::iterators::transform_width<    // retrieve 6 bit integers from a sequence of 8 bit bytes
-                  const char *, 6, 8
-               >
-            > base64_text; // compose all the above operations in to a new iterator
-
-    std::copy(
-        base64_text(in.c_str()),
-        base64_text(in.c_str() + in.size()),
-        ostream_iterator<char>(os)
-    );
-
-    out.clear();
-    out.assign(os.str());
-
-    for (int i = 0; i < out.length() % 4; i++)
-       out.append("=");
+   strcat(ks_output, "Ok.\n");
+   strcat(ks_output, res);
+   ks_output_length = strlen(ks_output);
 }
 
 static void open( KSFieldMap &fields )
 {
-   ks_content_params.get().append("Content-Type\n"
+   strcat(ks_content_params, "Content-Type\n"
                                   "text/html\n");
 
    if (fields.find("filedata") == fields.end())
       throw Exception("open: incorrect input field\n");
 
-   string &ks_out = ks_output.get();
-   ks_out.append("<html><body onload=\"parent.ui.loadMoleculeFromFile()\" title=\"");
+   strcat(ks_output, "<html><body onload=\"parent.ui.loadMoleculeFromFile()\" title=\"");
 
    string b64str;
    string instr = string("Ok.\n");
    convertToBase64(instr, b64str);
-   ks_out.append(b64str);
+   strcat(ks_output, b64str.c_str());
 
    instr = string(fields["filedata"]);
    convertToBase64(instr, b64str);
-   ks_out.append(b64str);
+   strcat(ks_output, b64str.c_str());
 
-   ks_out.append("\"></body></html>");
+   strcat(ks_output, "\"></body></html>");
+   ks_output_length = strlen(ks_output);
 }
 
 static void save( KSFieldMap &fields )
@@ -208,33 +210,33 @@ static void save( KSFieldMap &fields )
    string type(filedata.begin(), filedata.begin() + ln_pos - 1);
    string data(filedata.begin() + ln_pos + 1, filedata.end());
 
-   ks_content_params.get().append("Content-Type\n");
+   strcat(ks_content_params, "Content-Type\n");
    if (type.compare("smi") == 0)
-      ks_content_params.get().append("chemical/x-daylight-smiles\n");
+      strcat(ks_content_params, "chemical/x-daylight-smiles\n");
    else if (type.compare("mol") == 0)
    {
       if (data.find_first_of("$RXN") == 0)
       {
          type.assign("rxn");
-         ks_content_params.get().append("chemical/x-mdl-rxnfile\n");
+         strcat(ks_content_params, "chemical/x-mdl-rxnfile\n");
       }
       else
-         ks_content_params.get().append("chemical/x-mdl-molfile\n");
+         strcat(ks_content_params, "chemical/x-mdl-molfile\n");
    }
    else
-      ks_content_params.get().append("\n");
+      strcat(ks_content_params, "\n");
 
    std::ostringstream s_stream;
    s_stream << "Content-Length\n" << data.length() << "\n";
-   ks_content_params.get().append(s_stream.str());
+   strcat(ks_content_params, s_stream.str().c_str());
 
    s_stream.str("");
 
    s_stream << "Content-Disposition" << "\n" << "attachment; filename=\"ketcher." << type << "\"\n";
-   ks_content_params.get().append(s_stream.str());
+   strcat(ks_content_params, s_stream.str().c_str());
 
-   string &ks_out = ks_output.get();
-   ks_out.append(data);
+   strcat(ks_output, data.c_str());
+   ks_output_length = strlen(ks_output);
 }
 
 static void aromatize( KSFieldMap &fields )
@@ -250,8 +252,9 @@ static void aromatize( KSFieldMap &fields )
    const char *res = objMolfile(obj, is_rxn);
 
    indigoFree(obj);
-   ks_output.get().append("Ok.\n");
-   ks_output.get().append(res);
+   strcat(ks_output, "Ok.\n");
+   strcat(ks_output, res);
+   ks_output_length = strlen(ks_output);
 }
 
 static void dearomatize( KSFieldMap &fields )
@@ -267,8 +270,9 @@ static void dearomatize( KSFieldMap &fields )
    const char *res = objMolfile(obj, is_rxn);
 
    indigoFree(obj);
-   ks_output.get().append("Ok.\n");
-   ks_output.get().append(res);
+   strcat(ks_output, "Ok.\n");
+   strcat(ks_output, res);
+   ks_output_length = strlen(ks_output);
 }
 
 static void getInchi( KSFieldMap &fields )
@@ -282,8 +286,9 @@ static void getInchi( KSFieldMap &fields )
       throw Exception(indigoGetLastError());
 
    indigoFree(obj);
-   ks_output.get().append("Ok.\n");
-   ks_output.get().append(res);
+   strcat(ks_output, "Ok.\n");
+   strcat(ks_output, res);
+   ks_output_length = strlen(ks_output);
 }
 
 static void getSmiles( KSFieldMap &fields )
@@ -298,14 +303,14 @@ static void getSmiles( KSFieldMap &fields )
       throw Exception(indigoGetLastError());
 
    indigoFree(obj);
-   ks_output.get().append(res);
+   strcat(ks_output, res);
+   ks_output_length = strlen(ks_output);
 }
 
 static void render( KSFieldMap &fields )
 {
    bool is_rxn = 0, is_query = 0;
    int obj = loadObject(fields, is_rxn, is_query);
-   char num_buf[32];
 
    std::string format("png");
    if (fields.find("format") != fields.end())
@@ -321,7 +326,7 @@ static void render( KSFieldMap &fields )
    else
       throw Exception("render: only png and svg formats are supported now\n");
 
-   ks_content_params.get().append(s_stream.str());
+   strcat(ks_content_params, s_stream.str().c_str());
 
    indigoSetOption("render-output-format", format.c_str());
    indigoSetOption("render-background-color", "255, 255, 255");
@@ -361,7 +366,8 @@ static void render( KSFieldMap &fields )
    int buf_size;
    indigoToBuffer(indigo_buffer, &buf, &buf_size);
 
-   ks_output.get().assign(buf, buf_size);
+   memcpy(ks_output, buf, buf_size);
+   ks_output_length = buf_size;
 
    indigoRenderReset();
 
@@ -381,17 +387,20 @@ struct KetcherServerCommand
    }
 };
 
-static vector<KetcherServerCommand> ks_commands = boost::assign::list_of<KetcherServerCommand>
-   ("knocknock", knocknock)
-   ("layout", layout)
-   ("automap", automap)
-   ("open", open)
-   ("save", save)
-   ("aromatize", aromatize)
-   ("dearomatize", dearomatize)
-   ("getinchi", getInchi)
-   ("getsmiles", getSmiles)
-   ("render", render);
+static const KetcherServerCommand ks_commands_buf[] = {
+   KetcherServerCommand("knocknock", knocknock),
+   KetcherServerCommand("layout", layout),
+   KetcherServerCommand("automap", automap),
+   KetcherServerCommand("open", open),
+   KetcherServerCommand("save", save),
+   KetcherServerCommand("aromatize", aromatize),
+   KetcherServerCommand("dearomatize", dearomatize),
+   KetcherServerCommand("getinchi", getInchi),
+   KetcherServerCommand("getsmiles", getSmiles),
+   KetcherServerCommand("render", render)};
+
+static vector<KetcherServerCommand> ks_commands(ks_commands_buf, 
+   ks_commands_buf + sizeof(ks_commands_buf) / sizeof(ks_commands_buf[0]));
 
 static int getCommandId( const char * command_name )
 {
@@ -410,8 +419,8 @@ static int getCommandId( const char * command_name )
 
 static const char * runCommand( int cmd_idx, KSFieldMap &fields, int *output_len, const char **content_params )
 {
-   ks_output.get().clear();
-   ks_content_params.get().clear();
+   ks_output[0] = 0;
+   ks_content_params[0] = 0;
 
    try
    {
@@ -419,12 +428,12 @@ static const char * runCommand( int cmd_idx, KSFieldMap &fields, int *output_len
    }
    catch (Exception &ex)
    {
-      ks_output.get().append(ex.message());
+      strcat(ks_output, ex.message());
    }
 
-   *output_len = (int)ks_output.get().length();
-   *content_params = ks_content_params.get().data();
-   return ks_output.get().data();
+   *output_len = (int)ks_output_length;
+   *content_params = ks_content_params;
+   return ks_output;
 }
 
 CEXPORT const char * ketcherServerRunCommand( const char *command_name, int fields_count,
