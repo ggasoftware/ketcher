@@ -32,11 +32,24 @@ import org.apache.log4j.Logger;
 @Singleton
 @Path("/")
 public class KetcherServerMapping {
-    private KetcherServer ketcherServer;
+    private static KetcherServer ketcherServer = null;
+
     private static final Logger _logger = Logger.getLogger(KetcherServerMapping.class);
 
     public KetcherServerMapping() {
-        ketcherServer = new KetcherServer();
+        getKetcherServer();
+    }
+
+    synchronized public static KetcherServer getKetcherServer ()
+    {
+        if (ketcherServer == null)
+            ketcherServer = new KetcherServer();
+        return ketcherServer;
+    }
+
+    synchronized public static void unloadKetcherServer ()
+    {
+        ketcherServer = null;
     }
 
     @Path("/knocknock")
@@ -49,7 +62,7 @@ public class KetcherServerMapping {
         String[] values = new String[0];
         IntByReference outputLen = new IntByReference();
         String[] contentParams = new String[0];
-        return ketcherServer.runCommand("knocknock", 0, fields, values, outputLen, contentParams);
+        return getKetcherServer().runCommand("knocknock", 0, fields, values, outputLen, contentParams);
     }
 
     @Path("/layout")
@@ -76,7 +89,7 @@ public class KetcherServerMapping {
         values[0] = data;
         IntByReference outputLen = new IntByReference();
         String[] contentParams = new String[0];
-        return ketcherServer.runCommand("layout", 1, fields, values, outputLen, contentParams);
+        return getKetcherServer().runCommand("layout", 1, fields, values, outputLen, contentParams);
     }
 
     @Path("/automap")
@@ -105,7 +118,7 @@ public class KetcherServerMapping {
         values[1] = mode;
         IntByReference outputLen = new IntByReference();
         String[] contentParams = new String[0];
-        return ketcherServer.runCommand("automap", 2, fields, values, outputLen, contentParams);
+        return getKetcherServer().runCommand("automap", 2, fields, values, outputLen, contentParams);
     }
 
     @Path("/aromatize")
@@ -120,7 +133,7 @@ public class KetcherServerMapping {
         values[0] = data;
         IntByReference outputLen = new IntByReference();
         String[] contentParams = new String[0];
-        return ketcherServer.runCommand("aromatize", 1, fields, values, outputLen, contentParams);
+        return getKetcherServer().runCommand("aromatize", 1, fields, values, outputLen, contentParams);
     }
 
     @Path("/dearomatize")
@@ -135,7 +148,7 @@ public class KetcherServerMapping {
         values[0] = data;
         IntByReference outputLen = new IntByReference();
         String[] contentParams = new String[0];
-        return ketcherServer.runCommand("dearomatize", 1, fields, values, outputLen, contentParams);
+        return getKetcherServer().runCommand("dearomatize", 1, fields, values, outputLen, contentParams);
     }
 
 
@@ -186,7 +199,7 @@ public class KetcherServerMapping {
         values[0] = fileData;
         IntByReference outputLen = new IntByReference();
         String[] contentParams = new String[0];
-        return ketcherServer.runCommand("open", 1, fields, values, outputLen, contentParams);
+        return getKetcherServer().runCommand("open", 1, fields, values, outputLen, contentParams);
     }
 
     @Path("/getinchi")
@@ -201,6 +214,6 @@ public class KetcherServerMapping {
         values[0] = data;
         IntByReference outputLen = new IntByReference();
         String[] contentParams = new String[0];
-        return ketcherServer.runCommand("getinchi", 1, fields, values, outputLen, contentParams);
+        return getKetcherServer().runCommand("getinchi", 1, fields, values, outputLen, contentParams);
     }
 }
