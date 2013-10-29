@@ -31,6 +31,7 @@ parser = OptionParser(description='Indigo libraries build script')
 parser.add_option('--generator', help='this option is passed as -G option for cmake')
 parser.add_option('--preset', type="choice", dest="preset",
     choices=list(presets.keys()), help='build preset %s' % (str(presets.keys())))
+parser.add_option('--config', default="Release", help='project configuration')
 
 (args, left_args) = parser.parse_args()
 if len(left_args) > 0:
@@ -43,8 +44,11 @@ if not args.generator:
     print("Generator must be specified")
     exit()                                        
 
+if args.generator.find("Unix Makefiles") != -1 or args.generator.find("MinGW Makefiles") != -1:
+    args.params += " -DCMAKE_BUILD_TYPE=" + args.config
+
 command = 'cmake -G "{0}" ..'.format(args.generator)
 
 subprocess.check_call(command, shell=True)
-subprocess.check_call('cmake --build . --config Release', shell=True)
-subprocess.check_call('cmake --build . --target install --config Release', shell=True)
+subprocess.check_call('cmake --build . --config %s' % (args.config), shell=True)
+subprocess.check_call('cmake --build . --target install --config %s' % (args.config), shell=True)
