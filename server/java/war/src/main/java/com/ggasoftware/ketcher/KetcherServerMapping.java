@@ -27,10 +27,13 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.log4j.Logger;
+
 @Singleton
 @Path("/")
 public class KetcherServerMapping {
     private KetcherServer ketcherServer;
+    private static final Logger _logger = Logger.getLogger(KetcherServerMapping.class);
 
     public KetcherServerMapping() {
         ketcherServer = new KetcherServer();
@@ -41,6 +44,7 @@ public class KetcherServerMapping {
     @Consumes(MediaType.TEXT_PLAIN)
     @GET
     public String knocknock() {
+        _logger.info("Ketcher: knocknock");
         String[] fields = new String[0];
         String[] values = new String[0];
         IntByReference outputLen = new IntByReference();
@@ -65,6 +69,7 @@ public class KetcherServerMapping {
     }
 
     private String layout(String data) {
+        _logger.info("Ketcher: layout");
         String[] fields = new String[1];
         fields[0] = "smiles";
         String[] values = new String[1];
@@ -91,6 +96,7 @@ public class KetcherServerMapping {
     }
 
     private String automap(String mode, String data) {
+        _logger.info("Ketcher: automap");
         String[] fields = new String[2];
         fields[0] = "smiles";
         fields[1] = "mode";
@@ -107,6 +113,7 @@ public class KetcherServerMapping {
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public String aromatizePost(@FormParam("moldata") String data) {
+        _logger.info("Ketcher: aromatize");
         String[] fields = new String[1];
         fields[0] = "smiles";
         String[] values = new String[1];
@@ -121,6 +128,7 @@ public class KetcherServerMapping {
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public String dearomatizePost(@FormParam("moldata") String data) {
+        _logger.info("Ketcher: dearomatize");
         String[] fields = new String[1];
         fields[0] = "smiles";
         String[] values = new String[1];
@@ -135,6 +143,7 @@ public class KetcherServerMapping {
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response save(@FormDataParam("filedata") String fileData) {
+        _logger.info("Ketcher: save");
         StringBuilder builder = new StringBuilder();
         String[] lines = fileData.split("\n");
         String valueType = lines[0].trim();
@@ -170,6 +179,7 @@ public class KetcherServerMapping {
     @Produces(MediaType.TEXT_HTML)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public String open(@FormDataParam("filedata") String fileData) {
+        _logger.info("Ketcher: open");
         String[] fields = new String[1];
         fields[0] = "filedata";
         String[] values = new String[1];
@@ -184,6 +194,7 @@ public class KetcherServerMapping {
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public String getInchiPost(@FormParam("moldata") String data) {
+        _logger.info("Ketcher: inchi");
         String[] fields = new String[1];
         fields[0] = "smiles";
         String[] values = new String[1];
