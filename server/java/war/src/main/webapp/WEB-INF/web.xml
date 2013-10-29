@@ -6,6 +6,15 @@
          version="2.5">
     <display-name>Ketcher</display-name>
 
+    <context-param>
+        <param-name>log4jConfigLocation</param-name>
+        <param-value>/WEB-INF/conf/log4j.xml</param-value>
+    </context-param>
+
+    <listener>
+        <listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
+    </listener>
+    
     <filter>
         <filter-name>Ketcher</filter-name>
         <filter-class>com.sun.jersey.spi.container.servlet.ServletContainer</filter-class>
