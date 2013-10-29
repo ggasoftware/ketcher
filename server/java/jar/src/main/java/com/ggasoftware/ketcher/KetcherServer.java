@@ -163,9 +163,17 @@ public class KetcherServer {
         else // _os == OS_WINDOWS
         {
             if ((new File(getPathToBinary(path, "msvcr110.dll"))).exists())
-                System.load(getPathToBinary(path, "msvcr110.dll"));
+                try {
+                    System.load(getPathToBinary(path, "msvcr110.dll"));
+                } catch (UnsatisfiedLinkError e) {
+                    // File could have been already loaded
+                }
             if ((new File(getPathToBinary(path, "msvcp110.dll"))).exists())
-                System.load(getPathToBinary(path, "msvcp110.dll"));
+                try {
+                    System.load(getPathToBinary(path, "msvcp110.dll"));
+                } catch (UnsatisfiedLinkError e) {
+                    // File could have been already loaded
+                }
             _lib = (KetcherServerLib) Native.loadLibrary(getPathToBinary(path, "ketcher-server.dll"), KetcherServerLib.class);
         }
     }
