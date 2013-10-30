@@ -1,31 +1,28 @@
 cmake_minimum_required(VERSION 2.6)
 
 project(KetcherServer)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/indigo/common/cmake/)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/third_party/indigo/common/cmake/)
 INCLUDE(ConfigureCommon)
 
 ENABLE_TESTING()
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/../../common/cmake/ ${CMAKE_CURRENT_SOURCE_DIR}/cmake/)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/third_party/indigo/common/cmake/ ${CMAKE_CURRENT_SOURCE_DIR}/cmake/)
 
 set(THIRD_PARTY_DIR ${CMAKE_SOURCE_DIR}/third_party)
 file(GLOB KetcherServer_src src/*.c*)
 file(GLOB KetcherServer_headers src/*.h)
 
 include_directories(src)
-add_subdirectory(../third_party/indigo/build_scripts/indigo-all "${CMAKE_CURRENT_BINARY_DIR}/indigo-all")
-#add_subdirectory(../third_party/boost "${CMAKE_CURRENT_BINARY_DIR}/boost")
-#set(Boost_LIBRARIES boost_date_time boost_filesystem boost_program_options boost_system boost_thread boost_chrono)
+add_subdirectory(third_party/indigo/build_scripts/indigo-all "${CMAKE_CURRENT_BINARY_DIR}/indigo-all")
 set(Indigo_LIBRARIES indigo indigo-inchi indigo-renderer inchi png z pixman cairo tinyxml molecule layout graph reaction common render2d)
 set(Indigo_LIBRARIES ${Indigo_LIBRARIES} ${Indigo_LIBRARIES} ${Indigo_LIBRARIES})
 
 
-#include_directories(${BOOST_INCLUDE_DIR})
-include_directories(../third_party/indigo/common)
-include_directories(../third_party/indigo/api)
-include_directories(../third_party/indigo/api/plugins/renderer)
-include_directories(../third_party/indigo/api/plugins/inchi)
-#include_directories(../third_party/boost/include)
+include_directories(third_party/indigo/common)
+include_directories(third_party/indigo/api)
+include_directories(third_party/indigo/api/plugins/renderer)
+include_directories(third_party/indigo/api/plugins/inchi)
+#include_directories(third_party/boost/include)
 message(STATUS ${INDIGO_INCLUDE_DIR})
 
 add_library(ketcher-server-shared SHARED ${KetcherServer_src} ${KetcherServer_headers})
