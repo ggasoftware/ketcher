@@ -34,15 +34,11 @@ target_link_libraries(ketcher-server-shared ${Indigo_LIBRARIES})
 SET_TARGET_PROPERTIES(ketcher-server-shared PROPERTIES OUTPUT_NAME "ketcher-server")
 
 if(APPLE)
-    SET_TARGET_PROPERTIES(ketcher-server-shared PROPERTIES LINK_FLAGS "-Xlinker -framework -Xlinker ApplicationServices")
+    SET_TARGET_PROPERTIES(ketcher-server-shared PROPERTIES LINK_FLAGS "-Xlinker -framework -Xlinker ApplicationServices -Wl,-exported_symbols_list,${CMAKE_CURRENT_SOURCE_DIR}/ketcher_server.explist")
 endif()
 
-# Hide symbols
 if(UNIX AND NOT APPLE)
 	SET_TARGET_PROPERTIES(ketcher-server-shared PROPERTIES LINK_FLAGS -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/ketcher_server.so.map)
-endif()
-if(APPLE)
-	SET_TARGET_PROPERTIES(ketcher-server-shared PROPERTIES LINK_FLAGS "-Wl,-exported_symbols_list,${CMAKE_CURRENT_SOURCE_DIR}/ketcher_server.explist")
 endif()
 
 PACK_SHARED(ketcher-server-shared)
