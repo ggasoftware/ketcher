@@ -27,6 +27,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import java.net.URI;
+
 import org.apache.log4j.Logger;
 
 @Singleton
@@ -215,5 +217,12 @@ public class KetcherServerMapping {
         IntByReference outputLen = new IntByReference();
         String[] contentParams = new String[0];
         return getKetcherServer().runCommand("getinchi", 1, fields, values, outputLen, contentParams);
+    }
+
+    @Path("/")
+    @GET
+    public Response redirect() {
+        _logger.info("Ketcher: redirecting / to /ketcher.html");
+        return Response.seeOther(URI.create("/ketcher.html")).build();
     }
 }
