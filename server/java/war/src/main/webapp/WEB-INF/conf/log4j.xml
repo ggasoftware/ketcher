@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/"
+	debug="true">
+
+	<appender name="stdout" class="org.apache.log4j.ConsoleAppender">
+		<param name="Target" value="System.out" />
+		<param name="Encoding" value="UTF-8" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%-5p [%d{dd MMM yyyy HH:mm:ss}] %c{1} - %m%n" />
+		</layout>
+	</appender>
+
+	<appender name="ketcher" class="org.apache.log4j.RollingFileAppender">
+		<param name="Encoding" value="UTF-8" />
+		<param name="file" value="logs/ketcher.log" />
+		<param name="MaxFileSize" value="50MB" />
+		<param name="MaxBackupIndex" value="1" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%-5p [%d{dd MMM yyyy HH:mm:ss}] %c{1} - %m%n" />
+		</layout>
+	</appender>
+
+
+    <logger name="com.elsevier" additivity="false">
+        <level value="DEBUG"/>
+        <appender-ref ref="stdout"/>
+        <appender-ref ref="ketcher"/>
+    </logger>
+
+  
+	<root>
+		<priority value="INFO" />
+		<appender-ref ref="ketcher" />
+		<appender-ref ref="stdout" />
+	</root>
+
+
+</log4j:configuration>

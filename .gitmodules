@@ -1,0 +1,3 @@
+[submodule "server/third_party/indigo"]
+	path = server/third_party/indigo
+	url = https://github.com/ggasoftware/indigo.git
