@@ -419,6 +419,9 @@ static int getCommandId( const char * command_name )
 
 static const char * runCommand( int cmd_idx, KSFieldMap &fields, int *output_len, const char **content_params )
 {
+   // Set Indigo options
+   indigoSetOption("ignore-stereochemistry-errors", "true");
+
    ks_output[0] = 0;
    ks_content_params[0] = 0;
 
