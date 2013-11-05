@@ -166,6 +166,7 @@
                                         <include>loading.gif</include>
                                         <include>prototype-min.js</include>
                                         <include>raphael.js</include>
+                                        <include>templates.sdf</include>
                                     </includes>
                                 </resource>
                             </resources>
