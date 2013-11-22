@@ -22,31 +22,27 @@ include_directories(third_party/indigo/common)
 include_directories(third_party/indigo/api)
 include_directories(third_party/indigo/api/plugins/renderer)
 include_directories(third_party/indigo/api/plugins/inchi)
-message(STATUS ${INDIGO_INCLUDE_DIR})
 
 add_library(ketcher-server-shared SHARED ${KetcherServer_src} ${KetcherServer_headers})
 if (UNIX AND NOT APPLE)
 	if(${SUBSYSTEM_NAME} MATCHES "x64")
-		set_target_properties(ketcher-server-shared PROPERTIES LINK_FLAGS "${LINK_FLAGS} -Wl,--wrap=memcpy")
+		SET(LINK_FLAGS "${LINK_FLAGS} -Wl,--wrap=memcpy " )
 	endif()
 endif()
 target_link_libraries(ketcher-server-shared ${Indigo_LIBRARIES})
 SET_TARGET_PROPERTIES(ketcher-server-shared PROPERTIES OUTPUT_NAME "ketcher-server")
 
 if(APPLE)
-    SET_TARGET_PROPERTIES(ketcher-server-shared PROPERTIES LINK_FLAGS "-Xlinker -framework -Xlinker ApplicationServices -Wl,-exported_symbols_list,${CMAKE_CURRENT_SOURCE_DIR}/ketcher_server.explist")
+	SET(LINK_FLAGS "${LINK_FLAGS} -Xlinker -framework -Xlinker ApplicationServices -Wl,-exported_symbols_list,${CMAKE_CURRENT_SOURCE_DIR}/ketcher_server.explist ")
 endif()
 
 if(UNIX AND NOT APPLE)
-	SET_TARGET_PROPERTIES(ketcher-server-shared PROPERTIES LINK_FLAGS -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/ketcher_server.so.map)
+	SET(LINK_FLAGS "${LINK_FLAGS} -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/ketcher_server.so.map ")
 endif()
 
+set_target_properties(ketcher-server-shared PROPERTIES LINK_FLAGS "${LINK_FLAGS}")
+
 PACK_SHARED(ketcher-server-shared)
-
-#add_executable(ketcher-server-test test/ks_test.cpp)
-#target_link_libraries(ketcher-server-test ketcher-server-shared)
-
-#add_test(NAME ketcher-server-test COMMAND ketcher-server-test)
 
 SET(CMAKE_INSTALL_PREFIX "install")
 SET(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
